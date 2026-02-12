@@ -1,0 +1,30 @@
+# Dependencies
+roro-win/node_modules/
+roro-mac/
+
+# Build output
+roro-win/dist/
+roro-win/out/
+
+# Temp repos
+evero-releases-tmp/
+
+# Lock files
+roro-win/package-lock.json
+
+# OS files
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Environment / secrets
+.env
+*.pem
+
+# Temp files
+nul
+*.log
+*.tmp
+
+# Claude Code local settings
+.claude/settings.local.json
