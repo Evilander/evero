@@ -72,9 +72,9 @@ if (code.includes(oldLoadMap)) {
   const retStart = code.indexOf('return{success:!0,fileMap:{', loadIdx);
   if (retStart !== -1) {
     const fileMapStart = code.indexOf('fileMap:{', retStart) + 8;
-    // Find matching closing brace
+    // Find matching closing brace (start scanning AFTER the opening {)
     let depth = 1;
-    let pos = fileMapStart;
+    let pos = fileMapStart + 1;
     while (pos < code.length && depth > 0) {
       if (code[pos] === '{') depth++;
       else if (code[pos] === '}') depth--;

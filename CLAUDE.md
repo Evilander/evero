@@ -160,7 +160,8 @@ npx electron-builder --win --x64 --publish never
 ## Upstream
 
 - **Upstream repo**: `make-roro/roro-releases` (binary releases only, no source code)
-- **Fork**: `Evilander/evero-releases` with Windows builds (rebranded as EveRo)
+- **Source repo**: `Evilander/evero` (full source — scripts, config, resources, docs, roadmap)
+- **Release repo**: `Evilander/evero-releases` (binary releases + auto-update)
 - **Version**: 1.0.92 (multi-model Ollama integration + renderer fixes + EveRo rebrand)
 - **App**: Electron 39.x, React 19, Express server on localhost:3067, Claude Code integration via hooks
 
@@ -173,3 +174,30 @@ npx electron-builder --win --x64 --publish always
 # Or create release manually with gh cli
 gh release create v1.0.92-win dist/EveRo-1.0.92-win-x64.exe dist/EveRo-1.0.92-portable.exe --repo Evilander/evero-releases
 ```
+
+## Roadmap
+
+Detailed implementation plans in `memory/roadmap.md`. Summary:
+
+| Phase | Version | Feature | Status |
+|-------|---------|---------|--------|
+| 1 | v1.1.0 | **Palette System** — 12+ curated themes (Catppuccin, Nord, Dracula, Rosé Pine, Happy Hues) + custom creator | Planned |
+| 2 | v1.2.0 | **Widget Dashboard** — System perf, AI cost tracker, weather, quick launch, activity feed | Planned |
+| 3 | v1.3.0 | **Agent EKG** — Real-time animated health waveforms, composite stress scoring, predictive failure detection | Planned |
+| 4 | v2.0.0 | **Intelligence Layer** — Agent collaboration, session replay, voice control, cost intelligence | Planned |
+| 5 | v3.0.0 | **Mobile Companion** — React Native app for remote agent monitoring | Planned |
+
+### The Breakthrough: Agent EKG
+Nobody in AI tooling is doing real-time animated agent health visualization. The entire industry uses retrospective Grafana-style dashboards. EveRo's EKG will be the first to:
+- Render continuous animated waveforms encoding agent health as morphology
+- Compute composite stress scores from token velocity, latency jitter, error acceleration, repetition entropy
+- Predict failures before they happen (pre-loop, pre-stuck, pre-crash detection)
+- Use medical-grade aesthetics (phosphor persistence, grid lines, glow effects)
+
+Academic grounding: "Cognitive Load Framework for Tool-use Agents" (arXiv:2601.20412, Jan 2026) confirms agent stress is measurable and predictable.
+
+### Key Dependencies for Next Phases
+- `systeminformation` — PC performance metrics (CPU, RAM, GPU, disk)
+- `@catppuccin/palette`, `@rose-pine/palette` — Curated color palettes (MIT)
+- Open-Meteo API — Weather data (free, no key)
+- Canvas 2D + requestAnimationFrame — EKG rendering (built-in)

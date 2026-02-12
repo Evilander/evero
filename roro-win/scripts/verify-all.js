@@ -198,7 +198,7 @@ const cfgChecks = [
   ['shortcutName = EveRo', pkg.build.nsis.shortcutName === 'EveRo'],
   ['protocol name = evero', pkg.build.protocols.name === 'evero'],
   ['protocol scheme = evero', pkg.build.protocols.schemes[0] === 'evero'],
-  ['publish repo = evero-releases', pkg.build.publish.repo === 'evero-releases'],
+  ['publish repo = evero', pkg.build.publish.repo === 'evero'],
 ];
 
 cfgChecks.forEach(([name, ok]) => {
@@ -208,7 +208,7 @@ cfgChecks.forEach(([name, ok]) => {
 
 const appUpdate = fs.readFileSync(path.join(rootDir, 'resources/app-update.yml'), 'utf-8');
 const auChecks = [
-  ['app-update repo = evero-releases', appUpdate.includes('repo: evero-releases')],
+  ['app-update repo = evero', appUpdate.includes('repo: evero')],
   ['app-update cache = evero-updater', appUpdate.includes('updaterCacheDirName: evero-updater')],
 ];
 auChecks.forEach(([name, ok]) => {

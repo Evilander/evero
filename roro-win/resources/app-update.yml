@@ -1,5 +1,5 @@
 owner: Evilander
-repo: evero-releases
+repo: evero
 provider: github
 releaseType: release
 updaterCacheDirName: evero-updater

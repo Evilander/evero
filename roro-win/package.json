@@ -70,7 +70,7 @@
     "publish": {
       "provider": "github",
       "owner": "Evilander",
-      "repo": "evero-releases",
+      "repo": "evero",
       "releaseType": "release"
     },
     "extraResources": [

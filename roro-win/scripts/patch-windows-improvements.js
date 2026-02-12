@@ -144,12 +144,12 @@ const shellIdx = code.indexOf(shellHandlerPattern);
 if (shellIdx === -1) {
   log('  [4/4] WARNING: Could not find shell:openExternal handler - skipping config IPC');
 } else {
-  const configHandlers = `,
-c.ipcMain.handle("launch-config:set",async(ev,cfg)=>{if(z)z._launchConfig=cfg;return{success:!0}}),
-c.ipcMain.handle("launch-config:get",async()=>{return{success:!0,config:z?z._launchConfig||{}:{}}}),
-c.ipcMain.handle("launch-config:get-defaults",async()=>{return{success:!0,defaults:{autoLaunch:!0,skipPermissions:!1,model:"",verbose:!1,customFlags:""}}})`;
+  const configHandlers = `c.ipcMain.handle("launch-config:set",async(ev,cfg)=>{if(z)z._launchConfig=cfg;return{success:!0}}),c.ipcMain.handle("launch-config:get",async()=>{return{success:!0,config:z?z._launchConfig||{}:{}}}),c.ipcMain.handle("launch-config:get-defaults",async()=>{return{success:!0,defaults:{autoLaunch:!0,skipPermissions:!1,model:"",verbose:!1,customFlags:""}}})`;
 
-  code = code.substring(0, shellIdx) + configHandlers + ',' + code.substring(shellIdx);
+  // Check if char before shellIdx is already a comma - avoid double comma
+  const charBefore = code[shellIdx - 1];
+  const prefix = (charBefore === ',') ? '' : ',';
+  code = code.substring(0, shellIdx) + prefix + configHandlers + ',' + code.substring(shellIdx);
   log('  [4/4] Added launch-config IPC handlers');
 }
 
