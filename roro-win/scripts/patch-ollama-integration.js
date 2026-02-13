@@ -234,8 +234,8 @@ req.end();
 // PATCH 5: Extend launch-config defaults with ollamaModel
 // ============================================================
 
-const oldDefaults = 'defaults:{autoLaunch:!0,skipPermissions:!1,model:"",verbose:!1,customFlags:""}';
-const newDefaults = 'defaults:{autoLaunch:!0,skipPermissions:!1,model:"",verbose:!1,customFlags:"",ollamaModel:"llama3.2"}';
+const oldDefaults = 'defaults:{autoLaunch:!1,skipPermissions:!1,model:"",verbose:!1,customFlags:""}';
+const newDefaults = 'defaults:{autoLaunch:!1,skipPermissions:!1,model:"",verbose:!1,customFlags:"",ollamaModel:"llama3.2"}';
 
 if (code.includes(oldDefaults)) {
   code = code.replace(oldDefaults, newDefaults);

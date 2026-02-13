@@ -235,8 +235,49 @@ async function main() {
     log('  Rebrand patch error: ' + e.message);
   }
 
+  // Step 14: Fix index.html (title + clean template)
+  log('Step 14: Fixing renderer index.html...');
+  const indexHtmlPath = path.join(outDest, 'renderer', 'index.html');
+  fs.writeFileSync(indexHtmlPath, `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EveRo</title>
+    <script type="module" crossorigin src="./assets/index-BFJPEAID.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-CDjYEUtK.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
+`, 'utf-8');
+  log('  Set title to "EveRo", clean HTML template');
+
+  // Step 15: Restore custom EveRo icons (overwritten by Step 1 mac copy)
+  log('Step 15: Restoring custom EveRo icons...');
+  const iconsDir = path.join(WIN_ROOT, 'resources', 'icons');
+  const iconMap = [
+    ['evero_transparent.png', path.join(outDest, 'renderer', 'evero_transparent.png')],
+    ['evero_transparent-d1cj6xt4.png', path.join(outDest, 'renderer', 'assets', 'evero_transparent-d1cj6xt4.png')],
+    ['evero_icon-CWBhGVPN.png', path.join(outDest, 'renderer', 'assets', 'evero_icon-CWBhGVPN.png')],
+  ];
+  let iconCount = 0;
+  for (const [src, dest] of iconMap) {
+    const srcPath = path.join(iconsDir, src);
+    if (fs.existsSync(srcPath)) {
+      fs.copyFileSync(srcPath, dest);
+      iconCount++;
+    }
+  }
+  if (iconCount > 0) {
+    log(`  Restored ${iconCount} custom icons from resources/icons/`);
+  } else {
+    log('  No custom icons found in resources/icons/ — using defaults');
+  }
+
   log('');
-  log('Build preparation complete! (EveRo v1.1.0)');
+  log('Build preparation complete! (EveRo v1.0.92)');
   log('Next steps:');
   log('  1. Run: npm install (to get Windows native modules)');
   log('  2. Run: npm run dist (to build the Windows installer)');
