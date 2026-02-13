@@ -32,7 +32,7 @@ const preloadOrigLen = preload.length;
 const channelEnd = 'unlinkAgent:(e,r,t)=>n.ipcRenderer.invoke("channel:unlinkAgent",e,r,t)}});';
 
 if (preload.includes(channelEnd)) {
-  const ollamaBridge = `unlinkAgent:(e,r,t)=>n.ipcRenderer.invoke("channel:unlinkAgent",e,r,t)},ollama:{checkStatus:()=>n.ipcRenderer.invoke("ollama:check-status"),listModels:()=>n.ipcRenderer.invoke("ollama:list-models"),showModel:e=>n.ipcRenderer.invoke("ollama:show-model",e),setModel:(e,r)=>n.ipcRenderer.invoke("ollama:set-model",e,r),pullModel:e=>n.ipcRenderer.invoke("ollama:pull-model",e),deleteModel:e=>n.ipcRenderer.invoke("ollama:delete-model",e),runningModels:()=>n.ipcRenderer.invoke("ollama:running-models")},launchConfig:{set:e=>n.ipcRenderer.invoke("launch-config:set",e),get:()=>n.ipcRenderer.invoke("launch-config:get"),getDefaults:()=>n.ipcRenderer.invoke("launch-config:get-defaults")}});`;
+  const ollamaBridge = `unlinkAgent:(e,r,t)=>n.ipcRenderer.invoke("channel:unlinkAgent",e,r,t)},ollama:{checkStatus:()=>n.ipcRenderer.invoke("ollama:check-status"),listModels:()=>n.ipcRenderer.invoke("ollama:list-models"),showModel:e=>n.ipcRenderer.invoke("ollama:show-model",e),setModel:(e,r)=>n.ipcRenderer.invoke("ollama:set-model",e,r),pullModel:e=>n.ipcRenderer.invoke("ollama:pull-model",e),deleteModel:e=>n.ipcRenderer.invoke("ollama:delete-model",e),runningModels:()=>n.ipcRenderer.invoke("ollama:running-models"),onPullProgress:e=>{n.ipcRenderer.on("ollama:pull-progress",(ev,data)=>e(data));return()=>n.ipcRenderer.removeAllListeners("ollama:pull-progress")}},launchConfig:{set:e=>n.ipcRenderer.invoke("launch-config:set",e),get:()=>n.ipcRenderer.invoke("launch-config:get"),getDefaults:()=>n.ipcRenderer.invoke("launch-config:get-defaults")}});`;
   preload = preload.replace(channelEnd, ollamaBridge);
   log('  [1/3] Added ollama + launchConfig bridge to preload');
 } else {
@@ -92,6 +92,17 @@ if (!renderCode.includes(oldDms)) {
     `const[L,setL]=$.useState(false);` +  // loading
     `const[D,setD]=$.useState(null);` +  // detail model
     `const[Pm,setPm]=$.useState("");` +  // pull message
+    `const[Pp,setPp]=$.useState(0);` +  // pull progress percent
+    `const[Ps,setPs]=$.useState("");` +  // pull status text
+    `$.useEffect(()=>{` +
+      `if(!window.electronAPI||!window.electronAPI.ollama||!window.electronAPI.ollama.onPullProgress)return;` +
+      `const cleanup=window.electronAPI.ollama.onPullProgress(data=>{` +
+        `if(data.status==="success"){setPp(100);setPs("Complete!");return}` +
+        `if(data.total>0&&data.completed>0){setPp(Math.round(data.completed/data.total*100))}` +
+        `setPs(data.status||"")` +
+      `});` +
+      `return cleanup` +
+    `},[]);` +
     `const refresh=$.useCallback(async()=>{` +
       `setL(true);` +
       `try{` +
@@ -109,13 +120,13 @@ if (!renderCode.includes(oldDms)) {
     `$.useEffect(()=>{refresh()},[refresh]);` +
     `const handlePull=async()=>{` +
       `if(!P.trim())return;` +
-      `setPm("Pulling "+P.trim()+"...");` +
+      `setPm("Pulling "+P.trim()+"...");setPp(0);setPs("starting...");` +
       `try{` +
         `const r=await window.electronAPI.ollama.pullModel(P.trim());` +
         `setPm(r&&r.success?"Done! Refreshing...":"Error: "+(r&&r.error||"unknown"));` +
-        `if(r&&r.success){setTimeout(()=>{refresh();setPm("");setP("")},1000)}` +
-        `else{setTimeout(()=>setPm(""),3000)}` +
-      `}catch(e){setPm("Error: "+e.message);setTimeout(()=>setPm(""),3000)}` +
+        `if(r&&r.success){setTimeout(()=>{refresh();setPm("");setP("");setPp(0);setPs("")},1500)}` +
+        `else{setTimeout(()=>{setPm("");setPp(0);setPs("")},3000)}` +
+      `}catch(e){setPm("Error: "+e.message);setTimeout(()=>{setPm("");setPp(0);setPs("")},3000)}` +
     `};` +
     `const handleDelete=async(name)=>{` +
       `if(!confirm("Delete model "+name+"?"))return;` +
@@ -180,7 +191,13 @@ if (!renderCode.includes(oldDms)) {
           `E.jsx("input",{value:P,onChange:e=>setP(e.target.value),onKeyDown:e=>e.key==="Enter"&&handlePull(),placeholder:"e.g. kimi-k2.5, glm-5, deepseek-r1",style:{flex:1,padding:"8px 12px",borderRadius:"6px",border:"1px solid #2a3157",background:"#1a1f3d",color:"#fffffe",fontSize:"13px",outline:"none"}}),` +
           `E.jsx("button",{onClick:handlePull,disabled:!P.trim()||!!Pm,style:{padding:"8px 16px",borderRadius:"6px",background:"#eebbc3",color:"#232946",border:"none",cursor:P.trim()&&!Pm?"pointer":"not-allowed",fontSize:"13px",opacity:P.trim()&&!Pm?1:0.5},children:"Pull"})` +
         `]}),` +
-        `Pm&&E.jsx("div",{style:{marginTop:"8px",color:"#b8c1ec",fontSize:"12px"},children:Pm})` +
+        `Pm&&E.jsxs("div",{style:{marginTop:"8px"},children:[` +
+          `E.jsx("div",{style:{color:"#b8c1ec",fontSize:"12px",marginBottom:Pp>0?"6px":"0"},children:Pm+(Pp>0&&Pp<100?" ("+Pp+"%)":"")})` +
+          `,Pp>0&&E.jsx("div",{style:{width:"100%",height:"6px",borderRadius:"3px",background:"#1e2440",overflow:"hidden"},children:` +
+            `E.jsx("div",{style:{width:Pp+"%",height:"100%",borderRadius:"3px",background:Pp>=100?"#10b981":"#eebbc3",transition:"width 0.3s ease"}})` +
+          `})` +
+          `,Ps&&Pp>0&&Pp<100&&E.jsx("div",{style:{color:"#6b7ead",fontSize:"11px",marginTop:"4px"},children:Ps})` +
+        `]})` +
       `]}),` +
       // Featured Models
       `E.jsxs("div",{children:[` +

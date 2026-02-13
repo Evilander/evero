@@ -212,14 +212,29 @@ return{success:!1,error:"Agent is not an Ollama agent"}
 c.ipcMain.handle("ollama:pull-model",async(ev,modelName)=>{
 try{
 const http=require("http");
-const postData=JSON.stringify({name:modelName,stream:false});
-return await new Promise((resolve,reject)=>{
+const postData=JSON.stringify({name:modelName,stream:true});
+return await new Promise((resolve)=>{
 const req=http.request({hostname:"localhost",port:11434,path:"/api/pull",method:"POST",headers:{"Content-Type":"application/json","Content-Length":Buffer.byteLength(postData)}},res=>{
-let d="";res.on("data",c=>d+=c);
-res.on("end",()=>{try{resolve({success:!0,result:JSON.parse(d)})}catch{resolve({success:!0,result:d})}});
+let buf="";let lastStatus="";
+res.on("data",chunk=>{
+buf+=chunk.toString();
+const lines=buf.split("\\n");
+buf=lines.pop()||"";
+for(const line of lines){
+if(!line.trim())continue;
+try{const j=JSON.parse(line);
+if(k&&k.webContents)k.webContents.send("ollama:pull-progress",{model:modelName,status:j.status||"",total:j.total||0,completed:j.completed||0});
+if(j.status)lastStatus=j.status;
+}catch(pe){}}
+});
+res.on("end",()=>{
+if(k&&k.webContents)k.webContents.send("ollama:pull-progress",{model:modelName,status:"success",total:0,completed:0});
+resolve({success:!0,status:lastStatus});
+});
+res.on("error",e=>resolve({success:!1,error:e.message}));
 });
 req.on("error",e=>resolve({success:!1,error:e.message}));
-req.setTimeout(300000,()=>{req.destroy();resolve({success:!1,error:"Timeout (5min)"})});
+req.setTimeout(600000,()=>{req.destroy();resolve({success:!1,error:"Timeout (10min)"})});
 req.write(postData);
 req.end();
 });
