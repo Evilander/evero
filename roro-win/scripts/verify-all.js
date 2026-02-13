@@ -252,10 +252,32 @@ colorChecks.forEach(([name, ok]) => {
 log(`\n  Colors: ${colorPass}/${colorChecks.length} passed\n`);
 
 // ============================================================
+// STARTUP RELIABILITY VERIFICATION
+// ============================================================
+log('=== STARTUP RELIABILITY VERIFICATION ===\n');
+
+let startupPass = 0, startupFail = 0;
+
+const startupChecks = [
+  ['Services before window (A.init → S.init → y.init → me)', mainCode.includes('A.initialize();try{await Promise.race([S.initialize()')],
+  ['Auth init timeout (5s)', mainCode.includes('Promise.race([S.initialize()')],
+  ['Analytics init timeout (3s)', mainCode.includes('Promise.race([y.initialize()')],
+  ['Window right before IPC setup (me();if(k))', mainCode.includes('me();if(k){')],
+  ['Init error handling', mainCode.includes('catch(_ie)')],
+];
+
+startupChecks.forEach(([name, ok]) => {
+  log(`  ${ok ? 'PASS' : 'FAIL'} - ${name}`);
+  ok ? startupPass++ : startupFail++;
+});
+
+log(`\n  Startup: ${startupPass}/${startupChecks.length} passed\n`);
+
+// ============================================================
 // SUMMARY
 // ============================================================
-const totalPass = mainPass + renderPass + filePass + cfgPass + colorPass;
-const totalFail = mainFail + renderFail + fileFail + cfgFail + colorFail;
+const totalPass = mainPass + renderPass + filePass + cfgPass + colorPass + startupPass;
+const totalFail = mainFail + renderFail + fileFail + cfgFail + colorFail + startupFail;
 const totalChecks = totalPass + totalFail;
 
 log('=== SUMMARY ===\n');

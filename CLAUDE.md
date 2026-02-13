@@ -60,22 +60,22 @@ npx electron-builder --win --x64 --publish never
 
 ### Original Windows compat patches (v1.0.90)
 
-| # | What | Why |
-|---|------|-----|
+| \# | What | Why |
+| --- | --- | --- |
 | 2a | `notify-app.sh` → `notify-app.cmd` (13x) | Hook scripts are shell-specific |
 | 2b | Remove `chmod +x` calls | Windows doesn't use Unix permissions |
 | 2c | `frame:process.platform==="darwin"` → `frame:true` | Without this, Windows gets frameless window |
 | 2d | PATH fallback → System32 + PowerShell | Unix paths don't exist on Windows |
 | 2e | `sharp-darwin-arm64` → `sharp-win32-x64` | Platform-specific native binary |
-| 2f | `HOME` → `HOME\|\|USERPROFILE\|\|homedir()` | Windows uses USERPROFILE |
+| 2f | `HOME` → \`HOME |  |
 | 2g | `which claude` → `where claude` (conditional) | `which` is Unix-only |
 | 2h | `titleBarStyle:"hiddenInset"` → conditional | macOS-only titlebar style |
 | extra | `ps`/`pgrep` → `wmic` (separate script) | Unix process detection tools |
 
 ### UX improvement patches (v1.0.91)
 
-| # | What | Why |
-|---|------|-----|
+| \# | What | Why |
+| --- | --- | --- |
 | UX-1 | `requestSingleInstanceLock()` + `second-instance` handler | Prevents duplicate windows; routes deep links to existing window |
 | UX-2 | Simplified `setAsDefaultProtocolClient("roro")` | Removes broken `process.argv[1]` that caused cmd.exe errors |
 | UX-3 | Auto-launch Claude Code after terminal spawn | No more manual `claude` typing; uses configurable flags |
@@ -85,8 +85,8 @@ npx electron-builder --win --x64 --publish never
 
 #### Main process patches (`patch-ollama-integration.js`)
 
-| # | What | Why |
-|---|------|-----|
+| \# | What | Why |
+| --- | --- | --- |
 | OI-1 | `OllamaService` class (same interface as `ee`) | Streaming HTTP chat with Ollama API at localhost:11434 |
 | OI-2 | `createAgent` dispatch: `n==="ollama"?new OllamaService(r):new ee` | Route agent creation to correct service |
 | OI-3 | `modelLogo` dispatch: `n==="ollama"?"ollama":"claude"` | Correct logo for Ollama agents |
@@ -99,20 +99,20 @@ npx electron-builder --win --x64 --publish never
 
 #### Renderer patches (`patch-windows-renderer.js`)
 
-| # | What | Why |
-|---|------|-----|
+| \# | What | Why |
+| --- | --- | --- |
 | WR-1 | Ollama SVG logo added to `PH` and `zY` maps | Display llama icon for Ollama agents |
 | WR-2 | Alt text: `t.modelLogo==="ollama"?"Ollama":` added | Accessibility for Ollama logo |
-| WR-3 | `k.metaKey` → `(k.metaKey\|\|k.ctrlKey)` for Ctrl+L | File viewer toggle works on Windows |
-| WR-4 | `U.metaKey` → `(U.metaKey\|\|U.ctrlKey)` for Ctrl+Backspace | Terminal clear works on Windows |
+| WR-3 | `k.metaKey` → \`(k.metaKey |  |
+| WR-4 | `U.metaKey` → \`(U.metaKey |  |
 | WR-5 | `.split("/")` → `.split(/[/\\]/)` (8 occurrences) | Windows backslash paths in file views |
 | WR-6 | `[Claude]` event prefix → `[Hook]` | Generic hook label for multi-model |
 | WR-7 | Ollama button added to model selector | Users can select Ollama agent type |
 
 #### Path normalization patches (`patch-path-normalization.js`)
 
-| # | What | Why |
-|---|------|-----|
+| \# | What | Why |
+| --- | --- | --- |
 | PN-1 | `__normPath()` + `__normFileMap()` helpers | Normalize `\\` → `/` in all path data |
 | PN-2 | `filePath:__normPath(m)` in file-activity | File activity events use forward slashes |
 | PN-3 | `__normFileMap()` wraps file-map:load response | File map loads use forward slashes |
@@ -120,8 +120,8 @@ npx electron-builder --win --x64 --publish never
 
 #### Rebrand patches (`patch-rebrand.js`)
 
-| # | What | Why |
-|---|------|-----|
+| \# | What | Why |
+| --- | --- | --- |
 | RB-1 | `roro-dev` → `evero-dev` in userData path | App data directory |
 | RB-2 | `roro://auth/callback` → `evero://auth/callback` | OAuth redirect protocol |
 | RB-3 | `name:"roro"` → `name:"EveRo"` | Bot identity in DM system |
@@ -139,7 +139,7 @@ npx electron-builder --win --x64 --publish never
 ## Native Modules Strategy
 
 | Module | Approach |
-|--------|----------|
+| --- | --- |
 | `node-pty` | Already has win32-x64 prebuilds in unpacked dir |
 | `@anthropic-ai/claude-agent-sdk` | Already has win32 ripgrep binary |
 | `better-sqlite3` | Rebuilt via `@electron/rebuild` for Electron 39.x |
@@ -147,7 +147,7 @@ npx electron-builder --win --x64 --publish never
 
 ## Key Technical Notes
 
-- **Minified JS**: `out/main/index.js` is bundled into ~3 very long lines. Use node scripts (not grep) to search/extract context.
+- **Minified JS**: `out/main/index.js` is bundled into \~3 very long lines. Use node scripts (not grep) to search/extract context.
 - **robocopy quirk**: Returns exit code 1 on success (files copied). Only 8+ is error.
 - **electron-rebuild**: Use `--only better-sqlite3` to avoid rebuilding node-pty (which fails on GetCommitHash.bat).
 - **npmRebuild: false**: Set in package.json to prevent electron-builder from trying to rebuild native modules (we handle it manually).
@@ -168,6 +168,7 @@ npx electron-builder --win --x64 --publish never
 ## Release
 
 Auto-update points to `Evilander/evero-releases`. To publish:
+
 ```bash
 # Build and publish to GitHub releases
 npx electron-builder --win --x64 --publish always
@@ -180,7 +181,7 @@ gh release create v1.0.92-win dist/EveRo-1.0.92-win-x64.exe dist/EveRo-1.0.92-po
 Detailed implementation plans in `memory/roadmap.md`. Summary:
 
 | Phase | Version | Feature | Status |
-|-------|---------|---------|--------|
+| --- | --- | --- | --- |
 | 1 | v1.1.0 | **Palette System** — 12+ curated themes (Catppuccin, Nord, Dracula, Rosé Pine, Happy Hues) + custom creator | Planned |
 | 2 | v1.2.0 | **Widget Dashboard** — System perf, AI cost tracker, weather, quick launch, activity feed | Planned |
 | 3 | v1.3.0 | **Agent EKG** — Real-time animated health waveforms, composite stress scoring, predictive failure detection | Planned |
@@ -188,7 +189,9 @@ Detailed implementation plans in `memory/roadmap.md`. Summary:
 | 5 | v3.0.0 | **Mobile Companion** — React Native app for remote agent monitoring | Planned |
 
 ### The Breakthrough: Agent EKG
+
 Nobody in AI tooling is doing real-time animated agent health visualization. The entire industry uses retrospective Grafana-style dashboards. EveRo's EKG will be the first to:
+
 - Render continuous animated waveforms encoding agent health as morphology
 - Compute composite stress scores from token velocity, latency jitter, error acceleration, repetition entropy
 - Predict failures before they happen (pre-loop, pre-stuck, pre-crash detection)
@@ -197,6 +200,7 @@ Nobody in AI tooling is doing real-time animated agent health visualization. The
 Academic grounding: "Cognitive Load Framework for Tool-use Agents" (arXiv:2601.20412, Jan 2026) confirms agent stress is measurable and predictable.
 
 ### Key Dependencies for Next Phases
+
 - `systeminformation` — PC performance metrics (CPU, RAM, GPU, disk)
 - `@catppuccin/palette`, `@rose-pine/palette` — Curated color palettes (MIT)
 - Open-Meteo API — Weather data (free, no key)

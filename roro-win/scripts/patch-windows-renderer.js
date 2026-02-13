@@ -214,13 +214,12 @@ if (code.includes(oldEventPrefix)) {
 
 const codexButtonEnd = `children:[E.jsx("img",{src:jw,alt:"Codex",className:"w-4 h-4"}),E.jsx("span",{className:"text-sm text-dark-text-primary",children:"Codex"})]})`;
 
-const ollamaButton = `}),E.jsxs("button",{onClick:()=>p("ollama"),className:\`
-                    flex items-center space-x-2 px-3 py-2 rounded-lg border transition-colors
-                    \${d==="ollama"?"bg-dark-hover border-[#a855f7]/50 ring-1 ring-[#a855f7]/30":"border-dark-border hover:bg-dark-hover"}
-                  \`,children:[E.jsx("img",{src:"${OLLAMA_LOGO}",alt:"Ollama",className:"w-5 h-5"}),E.jsx("span",{className:"text-sm text-dark-text-primary",children:"Ollama"})]})`;
+const ollamaButton = `,E.jsxs("button",{onClick:()=>p("ollama"),className:\`flex items-center space-x-2 px-3 py-2 rounded-lg border transition-colors \${d==="ollama"?"bg-dark-hover border-[#a855f7]/50 ring-1 ring-[#a855f7]/30":"border-dark-border hover:bg-dark-hover"}\`,children:[E.jsx("img",{src:"${OLLAMA_LOGO}",alt:"Ollama",className:"w-5 h-5"}),E.jsx("span",{className:"text-sm text-dark-text-primary",children:"Ollama"})]})`;
 
 if (code.includes(codexButtonEnd)) {
-  code = code.replace(codexButtonEnd, codexButtonEnd.slice(0, -1) + ollamaButton);
+  // codexButtonEnd ends with ]}) — close children array, close props, close E.jsxs call
+  // We append ollamaButton (starts with comma) as a sibling in the parent array
+  code = code.replace(codexButtonEnd, codexButtonEnd + ollamaButton);
   log('  [6/6] Added Ollama button to model selector');
 } else {
   log('  [6/6] WARNING: Could not find Codex button end pattern');

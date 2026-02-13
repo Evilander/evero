@@ -84,15 +84,15 @@ if (!renderCode.includes(oldDms)) {
   // Build the Model Hub component as a self-contained inline React component
   // Uses window.electronAPI.ollama.* for IPC calls
   // Renders: status indicator, installed models list, pull input, featured models
-  const modelHub = `case"dms":return E.jsx((function(){` +
-    `const[S,setS]=W.useState(null);` +  // status
-    `const[M,setM]=W.useState([]);` +  // models
-    `const[R,setR]=W.useState([]);` +  // running models
-    `const[P,setP]=W.useState("");` +  // pull input
-    `const[L,setL]=W.useState(false);` +  // loading
-    `const[D,setD]=W.useState(null);` +  // detail model
-    `const[Pm,setPm]=W.useState("");` +  // pull message
-    `const refresh=W.useCallback(async()=>{` +
+  const modelHub = `case"dms":return E.jsx(function(){` +
+    `const[S,setS]=$.useState(null);` +  // status
+    `const[M,setM]=$.useState([]);` +  // models
+    `const[R,setR]=$.useState([]);` +  // running models
+    `const[P,setP]=$.useState("");` +  // pull input
+    `const[L,setL]=$.useState(false);` +  // loading
+    `const[D,setD]=$.useState(null);` +  // detail model
+    `const[Pm,setPm]=$.useState("");` +  // pull message
+    `const refresh=$.useCallback(async()=>{` +
       `setL(true);` +
       `try{` +
         `const st=await window.electronAPI.ollama.checkStatus();` +
@@ -106,7 +106,7 @@ if (!renderCode.includes(oldDms)) {
       `}catch(e){setS({success:false,error:e.message})}` +
       `setL(false);` +
     `},[]);` +
-    `W.useEffect(()=>{refresh()},[refresh]);` +
+    `$.useEffect(()=>{refresh()},[refresh]);` +
     `const handlePull=async()=>{` +
       `if(!P.trim())return;` +
       `setPm("Pulling "+P.trim()+"...");` +
@@ -194,7 +194,7 @@ if (!renderCode.includes(oldDms)) {
         `)})` +
       `]})` +
     `]})})` +
-  `})(),{})`;
+  `},{})`;
 
   renderCode = renderCode.replace(oldDms, modelHub);
   log('  [3/3] Replaced "Coming soon" with Model Hub component');

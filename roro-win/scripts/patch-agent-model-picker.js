@@ -45,7 +45,7 @@ if (!code.includes(searchPattern)) {
   // we inject a self-contained sub-component that manages its own state
 
   const modelPicker = insertAfter +
-    `d==="ollama"&&E.jsx((function(){` +
+    `d==="ollama"&&E.jsx(function(){` +
       `const[models,setModels]=$.useState([]);` +
       `const[selected,setSelected]=$.useState("");` +
       `const[loading,setLoading]=$.useState(true);` +
@@ -76,7 +76,7 @@ if (!code.includes(searchPattern)) {
           `})` +
         `]})` +
       `})` +
-    `})(),{}),` +
+    `},{}),` +
     insertBefore;
 
   code = code.replace(searchPattern, modelPicker);

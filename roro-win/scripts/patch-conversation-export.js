@@ -112,8 +112,8 @@ if (!renderCode.includes(oldHeader)) {
 } else {
   // Export button with dropdown for Markdown/JSON/Copy
   const exportBtn =
-    `E.jsx((function(){` +
-      `const[showMenu,setMenu]=W.useState(false);` +
+    `E.jsx(function(){` +
+      `const[showMenu,setMenu]=$.useState(false);` +
       `const doExport=(fmt)=>{` +
         `setMenu(false);` +
         `if(o.length===0)return;` +
@@ -139,7 +139,7 @@ if (!renderCode.includes(oldHeader)) {
           `E.jsx("button",{onClick:()=>doExport("copy"),style:{display:"block",width:"100%",textAlign:"left",padding:"6px 10px",borderRadius:"4px",border:"none",background:"transparent",color:"#fffffe",cursor:"pointer",fontSize:"12px"},onMouseEnter:ev=>ev.currentTarget.style.background="#2a3157",onMouseLeave:ev=>ev.currentTarget.style.background="transparent",children:"Copy to Clipboard"})` +
         `]})` +
       `]})` +
-    `})(),{})`;
+    `},{})`;
 
   const newHeader =
     `E.jsxs("div",{className:"flex items-center justify-between px-4 py-3 bg-dark-surface h-[60px]",` +

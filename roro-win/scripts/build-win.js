@@ -151,6 +151,11 @@ async function main() {
   } catch (e) {
     log('  Windows improvements patch error: ' + e.message);
   }
+  try {
+    require('./patch-startup-reliability.js');
+  } catch (e) {
+    log('  Startup reliability patch error: ' + e.message);
+  }
 
   // Step 6: Apply v1.0.92 patches (Ollama + renderer fixes + path normalization)
   log('Step 6: Applying v1.0.92 patches...');
@@ -218,6 +223,10 @@ async function main() {
     log('  Color palette patch error: ' + e.message);
   }
 
+  // Step 13: Palette system — DISABLED pending v1.1.0 release
+  // log('Step 13: Applying palette system...');
+  // try { require('./patch-palette-system.js'); } catch (e) { log('  Palette system patch error: ' + e.message); }
+
   // Step 13: Apply rebrand (roro -> EveRo) — always last
   log('Step 13: Applying EveRo rebrand...');
   try {
@@ -227,7 +236,7 @@ async function main() {
   }
 
   log('');
-  log('Build preparation complete! (EveRo v1.0.92)');
+  log('Build preparation complete! (EveRo v1.1.0)');
   log('Next steps:');
   log('  1. Run: npm install (to get Windows native modules)');
   log('  2. Run: npm run dist (to build the Windows installer)');
