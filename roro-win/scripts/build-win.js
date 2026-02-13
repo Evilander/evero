@@ -227,7 +227,7 @@ async function main() {
   // log('Step 13: Applying palette system...');
   // try { require('./patch-palette-system.js'); } catch (e) { log('  Palette system patch error: ' + e.message); }
 
-  // Step 13: Apply rebrand (roro -> EveRo) — always last
+  // Step 13: Apply rebrand (roro -> EveRo)
   log('Step 13: Applying EveRo rebrand...');
   try {
     require('./patch-rebrand.js');
@@ -235,8 +235,16 @@ async function main() {
     log('  Rebrand patch error: ' + e.message);
   }
 
-  // Step 14: Fix index.html (title + clean template)
-  log('Step 14: Fixing renderer index.html...');
+  // Step 14: UI polish & cleanup (tab labels, DM stubs, profile page)
+  log('Step 14: Applying UI polish & cleanup...');
+  try {
+    require('./patch-ui-polish.js');
+  } catch (e) {
+    log('  UI polish patch error: ' + e.message);
+  }
+
+  // Step 15: Fix index.html (title + clean template)
+  log('Step 15: Fixing renderer index.html...');
   const indexHtmlPath = path.join(outDest, 'renderer', 'index.html');
   fs.writeFileSync(indexHtmlPath, `<!DOCTYPE html>
 <html lang="en">
@@ -254,8 +262,8 @@ async function main() {
 `, 'utf-8');
   log('  Set title to "EveRo", clean HTML template');
 
-  // Step 15: Restore custom EveRo icons (overwritten by Step 1 mac copy)
-  log('Step 15: Restoring custom EveRo icons...');
+  // Step 16: Restore custom EveRo icons (overwritten by Step 1 mac copy)
+  log('Step 16: Restoring custom EveRo icons...');
   const iconsDir = path.join(WIN_ROOT, 'resources', 'icons');
   const iconMap = [
     ['evero_transparent.png', path.join(outDest, 'renderer', 'evero_transparent.png')],

@@ -7,13 +7,13 @@
 
 ## Architecture
 
-EveRo patches a pre-built Electron app (originally macOS-only) for Windows via a 13-step build pipeline. Each step is a Node.js script that performs string replacements on minified JS/CSS bundles.
+EveRo patches a pre-built Electron app (originally macOS-only) for Windows via a 16-step build pipeline. Each step is a Node.js script that performs string replacements on minified JS/CSS bundles.
 
 ```
 roro-win/
 ├── scripts/               # Build & patch scripts
-│   ├── build-win.js       # Orchestrates all 13 steps
-│   ├── verify-all.js      # 105 automated checks
+│   ├── build-win.js       # Orchestrates all 16 steps
+│   ├── verify-all.js      # 111 automated checks
 │   ├── patch-*.js         # Individual feature patches
 │   └── _test-esm.mjs     # ES module syntax validator
 ├── out/                   # Patched output (source of truth at build time)
@@ -30,7 +30,7 @@ roro-win/
 └── package.json           # Electron-builder config
 ```
 
-### Build Pipeline (13 Steps)
+### Build Pipeline (16 Steps)
 
 ```
 Step 1:  Copy out/ from macOS source
@@ -48,6 +48,7 @@ Step 12: Smart agent templates (+ Claude Agent / + Ollama Agent buttons)
 Step 13: Conversation export (Export button + save dialog)
 Step 14: Color palette (Navy/pink "Midnight Blush" theme)
 Step 15: Rebrand (roro → EveRo, all references + images)
+Step 16: UI polish (tab labels, DM stubs, About page, dead code cleanup)
 ```
 
 Run: `node scripts/build-win.js` then `npx electron-builder --win --x64`
@@ -92,6 +93,14 @@ Run: `node scripts/build-win.js` then `npx electron-builder --win --x64`
 ### Startup Reliability
 - Service init with timeouts: Auth (5s), Analytics (3s)
 - Window creation right before IPC handler registration (no race condition)
+
+### UI Polish (v1.0.92+)
+- Tab labels: "Models" (was "Tools"), "CLAUDE.md" (was "markdown")
+- DMs button hidden (vestigial Supabase feature, replaced by Model Hub)
+- DM IPC handlers stubbed with safe defaults (no Supabase connection attempts)
+- Profile view: About EveRo page (was empty null)
+- Auth system: graceful anonymous fallback when offline
+- Updater: points to Evilander/evero via GitHub provider
 
 ---
 
@@ -219,6 +228,77 @@ React Native app: mini EKGs on your phone, remote agent commands, push notificat
 
 ---
 
+## Agent Prompting Patterns (Research-Backed, 2025-2026)
+
+These patterns should be applied when prompting subagents, Ollama models, and multi-agent workflows.
+
+### Always Apply
+
+**Chain of Draft (CoD)** — For local/Ollama models, append to system prompt:
+> "Think step by step, but only keep a minimum draft for each thinking step, with 5 words at most."
+Reduces token count 60-92% with zero accuracy loss. (arXiv:2502.18600)
+
+**Emotional Prompting** — Append to any task prompt:
+> "This is very important. Embrace this challenge as an opportunity to demonstrate excellence."
++8-115% performance across tasks. Activates latent model capability. (arXiv:2307.11760, Microsoft)
+
+**Structured Deliverables** — Always specify exact output format. Fewer tools in context = better selection accuracy. Reduces extraneous cognitive load. (arXiv:2601.20412)
+
+### Multi-Agent Patterns
+
+**MSARL (Split Reasoning/Execution)** — Separate "Reasoning Agent" (plans tool use) from "Tool Agent" (executes + interprets). 1.5B split agents beat 7B single agents by 14-16%. (arXiv:2508.08882, ICLR 2026)
+
+**Cognitive Load Routing** — Route tasks by model sensitivity:
+```
+P_success = exp(-(k * CognitiveLoad + b))
+```
+| Model | k | Resilience |
+|---|---|---|
+| Fine-tuned 32B | 0.034 | Very resilient |
+| GPT-4o | 0.067 | Moderate |
+| Claude 3.7 | 0.073 | Moderate |
+| Qwen3-8B | 0.085 | Fragile under load |
+
+**Heterogeneous Debate** — Different specialist agents argue positions, Judge agent decides. Use rationale alignment (explicit agree/disagree with evidence). (arXiv:2511.07784)
+
+### Self-Improvement
+
+**Reflexion** — After failure: analyze trajectory, identify critical mistake, store reflection (max 3). Prepend reflections to next attempt. (arXiv:2303.11366)
+
+**MARS** — $2.20 self-improvement cycle: diagnose failures → cluster by type → generate 3 enhancement variants (Concise/Reasoning/Specific) → select best per category. Turned GPT-3.5 from 36% to 49% on GPQA in one cycle. (arXiv:2601.11974)
+
+### Agent EKG Signals (for v1.3.0)
+
+| Signal | Measures | Capture Method |
+|---|---|---|
+| Token velocity | Throughput | tokens/sec from streaming |
+| Latency jitter | Load spikes | variance in inter-token timing |
+| Error acceleration | Selection interference | tool failures over sliding window |
+| Repetition entropy | Stuck/looping | Shannon entropy of n-gram dist |
+| Mode-switching freq | Cognitive interference | reasoning/tool transitions |
+| Attentional distance | Memory load | turns between dependent ops |
+
+Performance hits a CLIFF, not a slope. The EKG waveform should compress and spike as cognitive load approaches the model's `k` threshold. (arXiv:2601.20412)
+
+### Subagent Prompt Template
+```
+You are a {domain_expert} specialist.
+This is important — give it your absolute best.
+
+TASK: {specific_task}
+
+APPROACH: Think step by step, 5 words max per step.
+
+DELIVERABLE: Return results in this exact format:
+{structured_format}
+
+CONSTRAINTS:
+- {constraint_1}
+- {constraint_2}
+```
+
+---
+
 ## Creative Feature Ideas (Future Exploration)
 
 ### Agent Personality Profiles
@@ -252,11 +332,11 @@ Compare model performance: send the same prompt to Claude and Ollama simultaneou
 
 ## Verification
 
-Run `node scripts/verify-all.js` — expects **105/105 checks passing**.
+Run `node scripts/verify-all.js` — expects **111/111 checks passing**.
 
 Categories:
-- Main process: 36 checks (Windows compat, UX, Ollama, paths, rebrand, startup)
-- Renderer: 25 checks (Ollama UI, shortcuts, paths, badges, templates, export, rebrand)
+- Main process: 38 checks (Windows compat, UX, Ollama, paths, rebrand, DM stubs, startup)
+- Renderer: 29 checks (Ollama UI, shortcuts, paths, badges, templates, export, rebrand, UI polish)
 - Files: 14 checks (all required files exist, old files removed)
 - Config: 10 checks (package.json settings)
 - Colors: 15 checks (CSS palette values)
@@ -266,7 +346,7 @@ Categories:
 
 ## Release
 
-Auto-update points to `Evilander/evero-releases`.
+Auto-update points to `Evilander/evero` (GitHub provider).
 
 ```bash
 # Build
@@ -278,11 +358,12 @@ dist/EveRo-1.0.92-win-x64.exe       # NSIS installer
 dist/EveRo-1.0.92-portable.exe       # Portable executable
 dist/win-unpacked/                    # Unpacked app (for testing)
 
-# Release
-gh release create v1.0.92 dist/EveRo-1.0.92-win-x64.exe dist/EveRo-1.0.92-portable.exe --repo Evilander/evero-releases
+# Release (with auto-update manifest)
+npx electron-builder --win --x64 --publish always
+# Or manual:
+gh release create v1.0.92-win dist/EveRo-1.0.92-win-x64.exe dist/EveRo-1.0.92-portable.exe --repo Evilander/evero
 ```
 
 ## Source Repository
 
-Source code: `Evilander/evero` (scripts, config, resources, documentation)
-Binary releases: `Evilander/evero-releases` (installers + auto-update)
+All-in-one: `Evilander/evero` (source on `source` branch, releases on `main` branch)

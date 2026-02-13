@@ -56,13 +56,19 @@ const mainChecks = [
   ['EveRo bot name', /name:"EveRo"/],
   ['evero_icon avatar', /evero_icon/],
   ['No "roro" quoted strings', null], // special check
+  // v1.0.92 UI polish
+  ['DM handlers stubbed', /direct-messages:getContacts",async\(\)=>/],
+  ['Original Xe(k) replaced', null], // special check: We(k),Xe(k) should NOT exist
 ];
 
 mainChecks.forEach(([name, test]) => {
   let ok;
-  if (test === null) {
-    // Check no remaining "roro" as standalone quoted string
+  if (name === 'No "roro" quoted strings') {
     ok = !mainCode.includes('"roro"');
+  } else if (name === 'Original Xe(k) replaced') {
+    ok = !mainCode.includes('We(k),Xe(k)');
+  } else if (test === null) {
+    ok = false;
   } else {
     ok = test.test(mainCode);
   }
@@ -114,6 +120,11 @@ const renderChecks = [
   ['Claude Agent template button', /children:"Claude Agent"/],
   ['Ollama Agent template button', /children:"Ollama Agent"/],
   ['Ollama createAgent in template', /createAgent\(s,ee,i,"ollama"\)/],
+  // UI polish
+  ['Models tab label (was Tools)', /label:"Models",view:"dms"/],
+  ['CLAUDE.md tab label (was markdown)', /label:"CLAUDE\.md",view:"activity"/],
+  ['DMs button hidden', /title:"DMs",style:\{display:"none"\}/],
+  ['About EveRo page', /Multi-Model AI Agent Command Center/],
 ];
 
 renderChecks.forEach(([name, test]) => {
